@@ -3,29 +3,43 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converter="clr-namespace:FormHostPoc.Converter"
         Title="ShellView" WindowStyle="None" ResizeMode="CanResizeWithGrip" 
-        Top="600" Left="800"
+       Name="ShelWindow"
+        Left="1200"
          Width="{Binding WindowWidth, Mode=TwoWay}" 
         Height="{Binding WindowHeight, Mode=TwoWay}">
-    
+
     <Window.Resources>
-        <converter:BoolToVisConverter x:Key="BoolToVisConverter"></converter:BoolToVisConverter>
+        <converter:BoolToVisConverter x:Key="BoolToVisConverter" />
     </Window.Resources>
+
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="50" />
             <RowDefinition Height="50" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Text="{Binding MainTitle}" Grid.Row="0" />
-        <StackPanel Grid.Row="1">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Column="1">
+                <Button Content="Test Button" Command="{Binding TestCommand}" Width="80" Height="30" Margin="10" />
+                <Button Content="X" Command="{Binding CloseCommand}" Height="30" Margin="10" Padding="5" />
+            </StackPanel>
+        </Grid>
+
+        <TextBlock Text="{Binding MainTitle}" Grid.Row="1" />
+        <StackPanel Grid.Row="2">
             <TextBlock Text="{Binding BreadCrumb}" />
             <TextBlock Text="{Binding WindowWidth}" />
             <TextBlock Text="{Binding WindowHeight}" />
         </StackPanel>
 
-        <TextBlock Text="Loading Gif" Foreground="Blue" Grid.Row="2"  Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisConverter}}" />
-        <ContentControl Content="{Binding Content}" Grid.Row="2"  Background="Aqua"  Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisConverter}, ConverterParameter=1}" />
+        <TextBlock Text="Loading Gif" Foreground="Blue" Grid.Row="3"  Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisConverter}}" />
+        <ContentControl Content="{Binding Content}" Grid.Row="3"  Background="Aqua"  Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisConverter}, ConverterParameter=1}" />
     </Grid>
 </Window>
