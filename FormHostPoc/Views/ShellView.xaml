@@ -4,7 +4,7 @@
         xmlns:converter="clr-namespace:FormHostPoc.Converter"
         Title="ShellView" WindowStyle="None" ResizeMode="CanResizeWithGrip" 
        Name="ShelWindow"
-        Left="1200"
+       
          Width="{Binding WindowWidth, Mode=TwoWay}" 
         Height="{Binding WindowHeight, Mode=TwoWay}">
 

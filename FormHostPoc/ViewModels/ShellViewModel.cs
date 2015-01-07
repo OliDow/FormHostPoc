@@ -6,8 +6,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
+using System.Windows.Shapes;
 using FormHostPoc.Helpers;
 using Microsoft.Practices.Prism.Commands;
 using System.Globalization;
@@ -31,45 +33,139 @@ namespace FormHostPoc.ViewModels
             _pr = new Process();
             ProcessStartInfo prs = new ProcessStartInfo();
             //prs.FileName = @"I:\Exec\a\a10.exe";
-            //prs.FileName = @"I:\Exec\j\j01.exe";
-            prs.FileName = @"c:\\SlowStarter.exe";
+            _pr.StartInfo.FileName = @"I:\Exec\j\j01.exe";
+            
+            //prs.FileName = @"c:\\SlowStarter.exe";
             //prs.FileName = @"C:\\Program Files (x86)\\Fiddler2\\Fiddler.exe";
             //prs.FileName = @"C:\\Program Files\\WinRAR\\WinRar.exe";
             //prs.FileName = @"C:\\Windows\\System32\\notepad.exe";
             //prs.UseShellExecute = true;
-            prs.WindowStyle = ProcessWindowStyle.Minimized;
-            _pr.StartInfo = prs;
-
-  _host.Child = _panel;
-                    Content = _host;
+            _pr.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            //_pr.StartInfo = prs;
 
 
-            ThreadStart ths = new ThreadStart(() =>
+            //const uint NORMAL_PRIORITY_CLASS = 0x00000020;
+            const uint NORMAL_PRIORITY_CLASS = 0x00000001;
+            //const uint NORMAL_PRIORITY_CLASS = 0x8000000;
+
+            bool retValue;
+            string Application1 = @"I:\Exec\j\j01.exe"; //Environment.GetEnvironmentVariable("windir") + @"\Notepad.exe";
+            string CommandLine = @" c:\boot.ini";
+            PROCESS_INFORMATION pInfo = new PROCESS_INFORMATION();
+            STARTUPINFO sInfo = new STARTUPINFO();
+            sInfo.cb = Marshal.SizeOf(sInfo); 
+
+            sInfo.dwFlags=   0x00000001; 
+            sInfo.wShowWindow = 0;
+
+            var pSec = new SECURITY_ATTRIBUTES();
+            var tSec = new SECURITY_ATTRIBUTES();
+            pSec.nLength = Marshal.SizeOf(pSec);
+            tSec.nLength = Marshal.SizeOf(tSec);
+
+            //Open Notepad
+            retValue = CreateProcess(Application1, CommandLine,
+            ref pSec, ref tSec, false, NORMAL_PRIORITY_CLASS,
+            IntPtr.Zero, null, ref sInfo, out pInfo);
+            
+
+           // _pr.Start();
+
+            // Wait until the process has a main window handle.
+            //while (_pr.MainWindowHandle == IntPtr.Zero)
+            //{
+            //    _pr.Refresh();
+            //}
+
+            //var wnd1 = FindWindowsWithText(_pr.Id, "Contract Maintenance");
+            
+            //IntPtr _childHandle1 = wnd1;
+
+            //ShowWindow(_childHandle1, 0);
+
+
+            _host.Child = _panel;
+             Content = _host;
+
+
+            ThreadStart ths = () =>
             { 
-                _pr.Start();
-                _pr.WaitForInputIdle();
+       
+                //_pr.WaitForInputIdle();
 
                 //Thread.Sleep(2000);
 
 
+                //Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                //{
+                //    Console.WriteLine("Info");
+                //    IntPtr win = GetActiveWindow();
+                //    var ctrl = GetFocus();
+                //    var wnd = FindWindowsWithText(_pr.Id, "Contract Maintenance");
+                //    _handler = _pr.MainWindowHandle;
+                //    IntPtr _childHandle = wnd;
+
+                //    Console.WriteLine(@"Win: {0} - Ctrl - {1}", win, ctrl);
+                //    BreadCrumb += string.Format(" | Host: {0} / {1} | handler: {2}", +_pr.Id, _pr.MainWindowHandle, _handler);
+
+
+                //    int dwStyle = GetWindowLong(_pr.MainWindowHandle, GWL_STYLE);
+                //    SetParent(_childHandle, _panel.Handle);
+                //    //SetWindowLong(_childHandle, GWL_STYLE, new IntPtr(dwStyle & ~WS_CAPTION & ~WS_THICKFRAME));
+                //    ShowWindow(_childHandle, SW_SHOWMAXIMIZED);
+                //    SetWindowPos(_childHandle, IntPtr.Zero, 0, -22, (int)Math.Round(WindowWidth), (int)Math.Round(WindowHeight) - 106, SWP_FRAMECHANGED);
+
+                //    Console.WriteLine(@"Win: {0} - Ctrl - {1}", win, ctrl);
+                //    IsLoading = false;
+
+                //    aTimer = new System.Timers.Timer(5);
+                //    aTimer.Interval = 2000;
+                //    aTimer.Enabled = true;
+
+                //    aTimer.Elapsed += (sender, args) =>
+                //    {
+                //        IntPtr ancestor = GetAncestor(_handler, GA_ROOT);
+                //        Console.WriteLine(ancestor == IntPtr.Zero ? "Closed" : "Open");
+                //    };
+
+                //}));
+                
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     Console.WriteLine("Info");
                     IntPtr win = GetActiveWindow();
                     var ctrl = GetFocus();
-                    var wnd = FindWindowsWithText(_pr.Id, "Contract Maintenance");
-                    _handler = _pr.MainWindowHandle;
+                    
+                    var wnd = FindWindowsWithText(pInfo.dwProcessId, "Contract Maintenance");
+                    _handler = (IntPtr) pInfo.dwProcessId;
                     IntPtr _childHandle = wnd;
 
+                    //Rectangle _childRect = new Rectangle();
+
+                    //RECT rct;
+                    //int childWidth=0;
+                    //int childHeight = 0;
+                    //if (GetWindowRect(new HandleRef(this, _childHandle), out rct))
+                    //{
+
+                    //    childWidth = rct.right - rct.left;
+                    //    childHeight = rct.bottom - rct.top;
+                      
+                    //}
+                
                     Console.WriteLine(@"Win: {0} - Ctrl - {1}", win, ctrl);
                     BreadCrumb += string.Format(" | Host: {0} / {1} | handler: {2}", +_pr.Id, _pr.MainWindowHandle, _handler);
 
-
-                    int dwStyle = GetWindowLong(_pr.MainWindowHandle, GWL_STYLE);
+                    //ShowWindow(_childHandle, 0);
+                    //int dwStyle = GetWindowLong(_pr.MainWindowHandle, GWL_STYLE);
                     SetParent(_childHandle, _panel.Handle);
                     //SetWindowLong(_childHandle, GWL_STYLE, new IntPtr(dwStyle & ~WS_CAPTION & ~WS_THICKFRAME));
-                    ShowWindow(_childHandle, SW_SHOWMAXIMIZED);
+                   
+                    //MoveWindow(_childHandle, 0, -23, childWidth + 1, childHeight + 23, true);
+
                     SetWindowPos(_childHandle, IntPtr.Zero, 0, -22, (int)Math.Round(WindowWidth), (int)Math.Round(WindowHeight) - 106, SWP_FRAMECHANGED);
+                    //SetWindowPos(_childHandle, IntPtr.Zero, 0, -22, childWidth, childHeight - 106, SWP_FRAMECHANGED);
+                    ShowWindow(_childHandle, 5);
 
                     Console.WriteLine(@"Win: {0} - Ctrl - {1}", win, ctrl);
                     IsLoading = false;
@@ -86,7 +182,7 @@ namespace FormHostPoc.ViewModels
 
                 }));
 
-            });
+            };
             Thread th = new Thread(ths);
             th.Start();
 
@@ -128,6 +224,107 @@ namespace FormHostPoc.ViewModels
             //            }, UiTaskSchedulerHelper.Instance.UiTaskScheduler);
         }
 
+        [StructLayout(LayoutKind.Sequential, Pack = 0)]
+        public struct RECT
+        {
+            /// <summary> Win32 </summary>
+            public int left;
+
+            /// <summary> Win32 </summary>
+            public int top;
+
+            /// <summary> Win32 </summary>
+            public int right;
+
+            /// <summary> Win32 </summary>
+            public int bottom;
+
+            /// <summary> Win32 </summary>
+            public static readonly RECT Empty = new RECT();
+
+            /// <summary> Win32 </summary>
+            public int Width
+            {
+                get { return Math.Abs(right - left); } // Abs needed for BIDI OS
+            }
+
+            /// <summary> Win32 </summary>
+            public int Height
+            {
+                get { return bottom - top; }
+            }
+
+            /// <summary> Win32 </summary>
+            public RECT(int left, int top, int right, int bottom)
+            {
+                this.left = left;
+                this.top = top;
+                this.right = right;
+                this.bottom = bottom;
+            }
+
+
+            /// <summary> Win32 </summary>
+            public RECT(RECT rcSrc)
+            {
+                left = rcSrc.left;
+                top = rcSrc.top;
+                right = rcSrc.right;
+                bottom = rcSrc.bottom;
+            }
+
+            /// <summary> Win32 </summary>
+            public bool IsEmpty
+            {
+                get
+                {
+                    // BUGBUG : On Bidi OS (hebrew arabic) left > right
+                    return left >= right || top >= bottom;
+                }
+            }
+
+            /// <summary> Return a user friendly representation of this struct </summary>
+            public override string ToString()
+            {
+                if (this == Empty)
+                {
+                    return "RECT {Empty}";
+                }
+
+                return "RECT { left : " + left + " / top : " + top + " / right : " + right + " / bottom : " + bottom +
+                       " }";
+            }
+
+            /// <summary> Determine if 2 RECT are equal (deep compare) </summary>
+            public override bool Equals(object obj)
+            {
+                if (!(obj is Rect))
+                {
+                    return false;
+                }
+                return (this == (RECT)obj);
+            }
+
+            /// <summary>Return the HashCode for this struct (not garanteed to be unique)</summary>
+            public override int GetHashCode()
+            {
+                return left.GetHashCode() + top.GetHashCode() + right.GetHashCode() + bottom.GetHashCode();
+            }
+
+
+            /// <summary> Determine if 2 RECT are equal (deep compare)</summary>
+            public static bool operator ==(RECT rect1, RECT rect2)
+            {
+                return (rect1.left == rect2.left && rect1.top == rect2.top && rect1.right == rect2.right &&
+                        rect1.bottom == rect2.bottom);
+            }
+
+            /// <summary> Determine if 2 RECT are different(deep compare)</summary>
+            public static bool operator !=(RECT rect1, RECT rect2)
+            {
+                return !(rect1 == rect2);
+            }
+        }
         private void OnCloseCommand()
         {
             _pr.Kill();
@@ -232,6 +429,7 @@ namespace FormHostPoc.ViewModels
                 return null;
             }
         }
+
         private static bool EnumWindow(IntPtr handle, IntPtr pointer)
         {
             GCHandle gch = GCHandle.FromIntPtr(pointer);
@@ -277,6 +475,7 @@ namespace FormHostPoc.ViewModels
         }
 
         #region WindowProperties
+        
         private double _windowWidth;
         public double WindowWidth
         {
@@ -340,6 +539,78 @@ namespace FormHostPoc.ViewModels
 
         private Process _pr;
         private static System.Timers.Timer aTimer;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool MoveWindow(IntPtr hwnd, int x, int y, int cx, int cy, bool repaint);
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct PROCESS_INFORMATION
+        {
+            public IntPtr hProcess;
+            public IntPtr hThread;
+            public int dwProcessId;
+            public int dwThreadId;
+        }
+
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        private static extern bool CreateProcessAsUser(
+            IntPtr hToken,
+            string lpApplicationName,
+            string lpCommandLine,
+            ref SECURITY_ATTRIBUTES lpProcessAttributes,
+            ref SECURITY_ATTRIBUTES lpThreadAttributes,
+            bool bInheritHandles,
+            uint dwCreationFlags,
+            IntPtr lpEnvironment,
+            string lpCurrentDirectory,
+            ref STARTUPINFO lpStartupInfo,
+            out PROCESS_INFORMATION lpProcessInformation); 
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        struct STARTUPINFO
+        {
+            public Int32 cb;
+            public string lpReserved;
+            public string lpDesktop;
+            public string lpTitle;
+            public Int32 dwX;
+            public Int32 dwY;
+            public Int32 dwXSize;
+            public Int32 dwYSize;
+            public Int32 dwXCountChars;
+            public Int32 dwYCountChars;
+            public Int32 dwFillAttribute;
+            public Int32 dwFlags;
+            public Int16 wShowWindow;
+            public Int16 cbReserved2;
+            public IntPtr lpReserved2;
+            public IntPtr hStdInput;
+            public IntPtr hStdOutput;
+            public IntPtr hStdError;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct SECURITY_ATTRIBUTES
+        {
+            public int nLength;
+            //public unsafe byte* lpSecurityDescriptor;
+            public int bInheritHandle;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        static extern bool CreateProcess(string lpApplicationName,
+           string lpCommandLine, ref SECURITY_ATTRIBUTES lpProcessAttributes,
+           ref SECURITY_ATTRIBUTES lpThreadAttributes, bool bInheritHandles,
+           uint dwCreationFlags, IntPtr lpEnvironment, string lpCurrentDirectory,
+           [In] ref STARTUPINFO lpStartupInfo,
+           out PROCESS_INFORMATION lpProcessInformation);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetWindowRect(HandleRef hwnd, out RECT lpRect);
+        private Int32 SW_MINIMIZE = 2;
 
         private readonly System.Windows.Forms.Panel _panel = new System.Windows.Forms.Panel();
         private readonly WindowsFormsHost _host = new WindowsFormsHost();
@@ -449,5 +720,9 @@ namespace FormHostPoc.ViewModels
         public DelegateCommand TestCommand { get; private set; }
         public DelegateCommand CloseCommand { get; private set; }
         #endregion
+
+     
     }
+
+
 }
