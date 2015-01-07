@@ -102,6 +102,9 @@
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Wrapper\IWrapperApi.cs" />
+    <Compile Include="Wrapper\IWrapperService.cs" />
+    <Compile Include="Wrapper\WindowsApi.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
