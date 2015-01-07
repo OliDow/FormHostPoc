@@ -24,52 +24,52 @@ namespace FormHostPoc.ViewModels
         {
             TestCommand = new DelegateCommand(OnTestCommand);
             CloseCommand = new DelegateCommand(OnCloseCommand);
-            WindowWidth = 900;
-            WindowHeight = 700;
+            //WindowWidth = 0;
+           // WindowHeight = 0;
             MainTitle = "Main Title";
             BreadCrumb = "Main" + Process.GetCurrentProcess().Id;
             //IsLoading = true;
 
             _pr = new Process();
-            ProcessStartInfo prs = new ProcessStartInfo();
+            //ProcessStartInfo prs = new ProcessStartInfo();
             //prs.FileName = @"I:\Exec\a\a10.exe";
-            _pr.StartInfo.FileName = @"I:\Exec\j\j01.exe";
+            _pr.StartInfo.FileName = @"I:\Exec\Noddies\SlowStarter.exe";
             
             //prs.FileName = @"c:\\SlowStarter.exe";
             //prs.FileName = @"C:\\Program Files (x86)\\Fiddler2\\Fiddler.exe";
             //prs.FileName = @"C:\\Program Files\\WinRAR\\WinRar.exe";
             //prs.FileName = @"C:\\Windows\\System32\\notepad.exe";
             //prs.UseShellExecute = true;
-            _pr.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            //_pr.StartInfo = prs;
+            //_pr.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+           // _pr.StartInfo = prs;
 
 
             //const uint NORMAL_PRIORITY_CLASS = 0x00000020;
-            const uint NORMAL_PRIORITY_CLASS = 0x00000001;
+            //const uint NORMAL_PRIORITY_CLASS = 0x00000001;
             //const uint NORMAL_PRIORITY_CLASS = 0x8000000;
 
-            bool retValue;
-            string Application1 = @"I:\Exec\j\j01.exe"; //Environment.GetEnvironmentVariable("windir") + @"\Notepad.exe";
-            string CommandLine = @" c:\boot.ini";
-            PROCESS_INFORMATION pInfo = new PROCESS_INFORMATION();
-            STARTUPINFO sInfo = new STARTUPINFO();
-            sInfo.cb = Marshal.SizeOf(sInfo); 
+            //bool retValue;
+            //string Application1 = @"I:\Exec\j\j01.exe"; //Environment.GetEnvironmentVariable("windir") + @"\Notepad.exe";
+            //string CommandLine = @" c:\boot.ini";
+            //PROCESS_INFORMATION pInfo = new PROCESS_INFORMATION();
+            //STARTUPINFO sInfo = new STARTUPINFO();
+            //sInfo.cb = Marshal.SizeOf(sInfo); 
 
-            sInfo.dwFlags=   0x00000001; 
-            sInfo.wShowWindow = 0;
+            //sInfo.dwFlags=   0x00000001; 
+            //sInfo.wShowWindow = 0;
 
-            var pSec = new SECURITY_ATTRIBUTES();
-            var tSec = new SECURITY_ATTRIBUTES();
-            pSec.nLength = Marshal.SizeOf(pSec);
-            tSec.nLength = Marshal.SizeOf(tSec);
+            //var pSec = new SECURITY_ATTRIBUTES();
+            //var tSec = new SECURITY_ATTRIBUTES();
+            //pSec.nLength = Marshal.SizeOf(pSec);
+            //tSec.nLength = Marshal.SizeOf(tSec);
 
-            //Open Notepad
-            retValue = CreateProcess(Application1, CommandLine,
-            ref pSec, ref tSec, false, NORMAL_PRIORITY_CLASS,
-            IntPtr.Zero, null, ref sInfo, out pInfo);
+            ////Open Notepad
+            //retValue = CreateProcess(Application1, CommandLine,
+            //ref pSec, ref tSec, false, NORMAL_PRIORITY_CLASS,
+            //IntPtr.Zero, null, ref sInfo, out pInfo);
             
 
-           // _pr.Start();
+            _pr.Start();
 
             // Wait until the process has a main window handle.
             //while (_pr.MainWindowHandle == IntPtr.Zero)
@@ -91,7 +91,7 @@ namespace FormHostPoc.ViewModels
             ThreadStart ths = () =>
             { 
        
-                //_pr.WaitForInputIdle();
+                _pr.WaitForInputIdle();
 
                 //Thread.Sleep(2000);
 
@@ -136,22 +136,12 @@ namespace FormHostPoc.ViewModels
                     IntPtr win = GetActiveWindow();
                     var ctrl = GetFocus();
                     
-                    var wnd = FindWindowsWithText(pInfo.dwProcessId, "Contract Maintenance");
-                    _handler = (IntPtr) pInfo.dwProcessId;
+                    var wnd = FindWindowsWithText(_pr.Id, "Contract Maintenance");
+                    _handler = (IntPtr) _pr.Id;
                     IntPtr _childHandle = wnd;
 
                     //Rectangle _childRect = new Rectangle();
 
-                    //RECT rct;
-                    //int childWidth=0;
-                    //int childHeight = 0;
-                    //if (GetWindowRect(new HandleRef(this, _childHandle), out rct))
-                    //{
-
-                    //    childWidth = rct.right - rct.left;
-                    //    childHeight = rct.bottom - rct.top;
-                      
-                    //}
                 
                     Console.WriteLine(@"Win: {0} - Ctrl - {1}", win, ctrl);
                     BreadCrumb += string.Format(" | Host: {0} / {1} | handler: {2}", +_pr.Id, _pr.MainWindowHandle, _handler);
@@ -162,10 +152,22 @@ namespace FormHostPoc.ViewModels
                     //SetWindowLong(_childHandle, GWL_STYLE, new IntPtr(dwStyle & ~WS_CAPTION & ~WS_THICKFRAME));
                    
                     //MoveWindow(_childHandle, 0, -23, childWidth + 1, childHeight + 23, true);
+                    //int SWP_NOREDRAW = 0x0008;
 
+                    RECT rct;
+                    int childWidth = 0;
+                    int childHeight = 0;
+                    if (GetWindowRect(new HandleRef(this, _childHandle), out rct))
+                    {
+
+                        WindowWidth = rct.right - rct.left;
+                        WindowHeight = rct.bottom - rct.top + 106;
+
+                    }
+                    //SWP_NOREDRAW = 0x0008,
                     SetWindowPos(_childHandle, IntPtr.Zero, 0, -22, (int)Math.Round(WindowWidth), (int)Math.Round(WindowHeight) - 106, SWP_FRAMECHANGED);
                     //SetWindowPos(_childHandle, IntPtr.Zero, 0, -22, childWidth, childHeight - 106, SWP_FRAMECHANGED);
-                    ShowWindow(_childHandle, 5);
+                    //ShowWindow(_childHandle, 5);
 
                     Console.WriteLine(@"Win: {0} - Ctrl - {1}", win, ctrl);
                     IsLoading = false;
@@ -176,7 +178,7 @@ namespace FormHostPoc.ViewModels
 
                     aTimer.Elapsed += (sender, args) =>
                     {
-                        IntPtr ancestor = GetAncestor(_handler, GA_ROOT);
+                        IntPtr ancestor = GetAncestor(_childHandle, GA_ROOT);
                         Console.WriteLine(ancestor == IntPtr.Zero ? "Closed" : "Open");
                     };
 
