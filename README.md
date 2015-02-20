@@ -1,4 +1,4 @@
 FormHostPoc
 ===========
 
-Pair prograemd proof of concept
+Pair programmed proof of concept
